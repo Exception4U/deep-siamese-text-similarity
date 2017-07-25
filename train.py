@@ -23,7 +23,7 @@ tf.flags.DEFINE_integer("hidden_units", 50, "Number of hidden units in softmax r
 tf.flags.DEFINE_string("word2vec", "word2vec/GoogleNews-vectors-negative300.bin","Google's pretrained embedding")
 
 # Training parameters
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
+tf.flags.DEFINE_integer("batch_size", 256, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 300, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 1000, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 1000, "Save model after this many steps (default: 100)")
@@ -154,7 +154,12 @@ with tf.Graph().as_default():
                              siameseModel.input_y: y_batch,
                              siameseModel.dropout_keep_prob: FLAGS.dropout_keep_prob,
             }
-        _, step, loss, accuracy, dist,summary = sess.run([tr_op_set, global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.distance,siameseModel.merge],  feed_dict)
+        _, step, loss, accuracy, dist,summary = sess.run([tr_op_set, global_step,\
+                                                          siameseModel.loss,\
+                                                          siameseModel.accuracy, \
+                                                          siameseModel.distance,\
+                                                          siameseModel.merge], \
+                                                         feed_dict)
 
         #added summary for variables in tensarboard
         #tf.scalar_summary("dist",dist)
@@ -188,7 +193,11 @@ with tf.Graph().as_default():
                              siameseModel.input_y: y_batch,
                              siameseModel.dropout_keep_prob: 1  #FLAGS.dropout_keep_prob,
             }
-        step, loss, accuracy, dist , summary = sess.run([global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.distance , siameseModel.merge],  feed_dict)
+        step, loss, accuracy, dist = sess.run([global_step, \
+                                               siameseModel.loss,\
+                                               siameseModel.accuracy,\
+                                               siameseModel.distance ], \
+                                              feed_dict)
 
 #        test_writer.add_summary(summary,nn)
 
