@@ -56,47 +56,46 @@ class SiameseLSTM(object):
         return -(tf.reduce_sum(tmp+tmp2)/batch_size)
 
 
-    def __init__(
-      self, sequence_length, vocab_size, embedding_size, hidden_units, l2_reg_lambda, batch_size):
+    def __init__(self, sequence_length, vocab_size, embedding_size, hidden_units, l2_reg_lambda, batch_size):
 
-      # Placeholders for input, output and dropout
-      self.input_x1 = tf.placeholder(tf.int32, [None, sequence_length], name="input_x1")
-      self.input_x2 = tf.placeholder(tf.int32, [None, sequence_length], name="input_x2")
-      self.input_y = tf.placeholder(tf.float32, [None], name="input_y")
-      self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
+        # Placeholders for input, output and dropout
+        self.input_x1 = tf.placeholder(tf.float32, [None, sequence_length, vocab_size], name="input_x1")
+        self.input_x2 = tf.placeholder(tf.float32, [None, sequence_length, vocab_size], name="input_x2")
+        self.input_y = tf.placeholder(tf.float32, [None], name="input_y")
+        self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
-      # Keeping track of l2 regularization loss (optional)
-      l2_loss = tf.constant(0.0, name="l2_loss")
+        # Keeping track of l2 regularization loss (optional)
+        l2_loss = tf.constant(0.0, name="l2_loss")
 
-      # Embedding layer
-      with tf.name_scope("embedding"):
-          self.W = tf.Variable(
-#              tf.ones([vocab_size,embedding_size],tf.float32),
+        # Embedding layer
+        #with tf.name_scope("embedding"):
+        #    self.W = tf.Variable(
+    #              tf.ones([vocab_size,embedding_size],tf.float32),
 
-#              tf.zeros([vocab_size,embedding_size],tf.float32),
-              tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
-              trainable=True,name="W")
-          self.embedded_chars1 = tf.nn.embedding_lookup(self.W, self.input_x1)
-          #self.embedded_chars_expanded1 = tf.expand_dims(self.embedded_chars1, -1)
-          self.embedded_chars2 = tf.nn.embedding_lookup(self.W, self.input_x2)
-          #self.embedded_chars_expanded2 = tf.expand_dims(self.embedded_chars2, -1)
+    #              tf.zeros([vocab_size,embedding_size],tf.float32),
+        #        tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
+        #        trainable=True,name="W")
+        #    self.embedded_chars1 = tf.nn.embedding_lookup(self.W, self.input_x1)
+            #self.embedded_chars_expanded1 = tf.expand_dims(self.embedded_chars1, -1)
+        #    self.embedded_chars2 = tf.nn.embedding_lookup(self.W, self.input_x2)
+            #self.embedded_chars_expanded2 = tf.expand_dims(self.embedded_chars2, -1)
 
-      # Create a convolution + maxpool layer for each filter size
-      with tf.name_scope("output"):
-        self.out1=self.BiRNN(self.embedded_chars1, self.dropout_keep_prob, "side1", embedding_size, sequence_length)
-        self.out2=self.BiRNN(self.embedded_chars2, self.dropout_keep_prob, "side2", embedding_size, sequence_length)
-        self.distance = tf.sqrt(tf.reduce_sum(tf.square(tf.sub(self.out1,self.out2)),1,keep_dims=True))
-        self.distance = tf.div(self.distance, tf.add(tf.sqrt(tf.reduce_sum(tf.square(self.out1),1,keep_dims=True)),tf.sqrt(tf.reduce_sum(tf.square(self.out2),1,keep_dims=True))))
-        self.distance = tf.reshape(self.distance, [-1], name="distance")
-      with tf.name_scope("loss"):
-          #import pdb;pdb.set_trace()
-          self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size)
-          #self.loss = self.log_loss(self.input_y,self.distance, batch_size)
-#          self.loss = tf.contrib.losses.log_loss(predictions=self.distance, targets=self.input_y,weight = 1.0, epsilon = 1e-07, scope = None)
-      with tf.name_scope("accuracy"):
-          correct_predictions = tf.equal(self.distance, self.input_y)
-          self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
+        # Create a convolution + maxpool layer for each filter size
+        with tf.name_scope("output"):
+            self.out1=self.BiRNN(self.input_x1, self.dropout_keep_prob, "side1", vocab_size, sequence_length)
+            self.out2=self.BiRNN(self.input_x2, self.dropout_keep_prob, "side2", vocab_size, sequence_length)
+            self.distance = tf.sqrt(tf.reduce_sum(tf.square(tf.sub(self.out1,self.out2)),1,keep_dims=True))
+            self.distance = tf.div(self.distance, tf.add(tf.sqrt(tf.reduce_sum(tf.square(self.out1),1,keep_dims=True)),tf.sqrt(tf.reduce_sum(tf.square(self.out2),1,keep_dims=True))))
+            self.distance = tf.reshape(self.distance, [-1], name="distance")
+        with tf.name_scope("loss"):
+            #import pdb;pdb.set_trace()
+            self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size)
+            #self.loss = self.log_loss(self.input_y,self.distance, batch_size)
+    #          self.loss = tf.contrib.losses.log_loss(predictions=self.distance, targets=self.input_y,weight = 1.0, epsilon = 1e-07, scope = None)
+        with tf.name_scope("accuracy"):
+            correct_predictions = tf.equal(self.distance, self.input_y)
+            self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
 
-      tf.scalar_summary("accuracy",self.accuracy)
-      tf.scalar_summary("loss",self.loss)
-      self.merge = tf.merge_all_summaries()
+        tf.scalar_summary("accuracy",self.accuracy)
+        tf.scalar_summary("loss",self.loss)
+        self.merge = tf.merge_all_summaries()
