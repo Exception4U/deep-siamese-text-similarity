@@ -96,6 +96,6 @@ class SiameseLSTM(object):
             correct_predictions = tf.equal(self.distance, self.input_y)
             self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
 
-        tf.scalar_summary("accuracy",self.accuracy)
-        tf.scalar_summary("loss",self.loss)
-        self.merge = tf.merge_all_summaries()
+        self.accuracy_sum = tf.scalar_summary("accuracy",self.accuracy)
+        self.loss_sum = tf.scalar_summary("loss",self.loss)
+        self.merge = tf.merge_summary([accuracy_sum, loss_sum])

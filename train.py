@@ -26,9 +26,9 @@ tf.flags.DEFINE_string("word2vec", "","Google's pretrained embedding")
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 10, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("num_epochs", 300, "Number of training epochs (default: 200)")
-tf.flags.DEFINE_integer("evaluate_every", 1000, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("checkpoint_every", 1000, "Save model after this many steps (default: 100)")
+tf.flags.DEFINE_integer("num_epochs", 100, "Number of training epochs (default: 200)")
+tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
+tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
@@ -218,10 +218,11 @@ with tf.Graph().as_default():
         step, loss, accuracy, dist = sess.run([global_step, \
                                                siameseModel.loss,\
                                                siameseModel.accuracy,\
-                                               siameseModel.distance ], \
+                                               siameseModel.distance
+                                               ], \
                                               feed_dict)
 
-#        test_writer.add_summary(summary,nn)
+        #test_writer.add_summary(summary,nn)
 
         time_str = datetime.datetime.now().isoformat()
         d = np.copy(dist)
@@ -248,8 +249,8 @@ with tf.Graph().as_default():
         sum_acc=0.0
         if current_step % FLAGS.evaluate_every == 0:
             print("\nEvaluation:")
-            dev_batches = inpH.batch_iter(dev_set[0],dev_set[1],dev_set[2], FLAGS.batch_size, convModel.spec, 1)
-            for db in dev_batches:
+            dev_batches = inpH.batch_iter(dev_set[0],dev_set[1],dev_set[2], FLAGS.batch_size, 1, convModel.spec)
+            for (x1_dev_b,x2_dev_b,y_dev_b) in dev_batches:
                 if len(y_dev_b)<1:
                     continue
                 acc = dev_step(x1_dev_b, x2_dev_b, y_dev_b)

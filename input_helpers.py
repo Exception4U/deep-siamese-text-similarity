@@ -95,7 +95,7 @@ class InputHelper(object):
 
         # Loading Positive sample file
         l = []
-        for line in open(base_filepath + 'positive_annotations.txt'):
+        for line in open(base_filepath + 'unipolar_annotations.txt'):
             line=line.split('/', 1)[0]
             if (len(line) > 0  and line[0] == 'F'):
                 l.append(line.strip())
@@ -104,11 +104,11 @@ class InputHelper(object):
         num_positive_samples = len(l)
         for i in range(0, num_positive_samples, 2):
             if random() > 0.5:
-                x1.append(self.getfilenames(l[i]), base_filepath, mapping_dict, max_document_length)
-                x2.append(self.getfilenames(l[i+1]), base_filepath, mapping_dict, max_document_length)
+                x1.append(self.getfilenames(l[i], base_filepath, mapping_dict, max_document_length))
+                x2.append(self.getfilenames(l[i+1], base_filepath, mapping_dict, max_document_length))
             else:
-                x1.append(self.getfilenames(l[i+1]), base_filepath, mapping_dict, max_document_length)
-                x2.append(self.getfilenames(l[i]), base_filepath, mapping_dict, max_document_length)
+                x1.append(self.getfilenames(l[i+1], base_filepath, mapping_dict, max_document_length))
+                x2.append(self.getfilenames(l[i], base_filepath, mapping_dict, max_document_length))
 
             y.append(1)#np.array([0,1]))
 
